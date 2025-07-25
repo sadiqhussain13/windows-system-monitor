@@ -5,7 +5,14 @@ from plyer import notification
 import logging
 
 # Set up logging for debugging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('system_monitor.log'),
+        logging.StreamHandler()  # Keep console output for script testing
+    ]
+)
 
 class SystemMonitor:
     def __init__(self, root):
