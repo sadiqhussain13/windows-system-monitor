@@ -1,7 +1,7 @@
 import psutil
 import tkinter as tk
 from tkinter import messagebox
-from plyer import notification
+from win10toast import ToastNotifier
 import logging
 
 # Set up logging for debugging
@@ -19,6 +19,9 @@ class SystemMonitor:
         self.root = root
         self.root.title("System Monitor")
         self.root.geometry("400x300")
+
+        # Initialize toaster for notifications
+        self.toaster = ToastNotifier()
         
         # Default thresholds
         self.cpu_threshold = 80.0
@@ -96,7 +99,7 @@ class SystemMonitor:
         
         # Get system metrics
         try:
-            cpu_usage = psutil.cpu_percent(interval=1)
+            cpu_usage = psutil.cpu_percent(interval=0.1)
             memory_info = psutil.virtual_memory()
             memory_usage = memory_info.percent
             disk_info = psutil.disk_usage('/')
@@ -115,10 +118,11 @@ class SystemMonitor:
         # Check thresholds and send notifications
         try:
             if cpu_usage > self.cpu_threshold and not self.cpu_notified:
-                notification.notify(
+                self.toaster.show_toast(
                     title="System Monitor Alert",
-                    message=f"CPU usage exceeded threshold: {cpu_usage:.1f}%",
-                    timeout=10
+                    msg=f"CPU usage exceeded threshold: {cpu_usage:.1f}%",
+                    duration=10,
+                    threaded=True  # Run notification in a separate thread to avoid blocking
                 )
                 self.cpu_notified = True
                 logging.debug("CPU notification sent: %.1f%%", cpu_usage)
@@ -126,10 +130,11 @@ class SystemMonitor:
                 self.cpu_notified = False
                 
             if memory_usage > self.memory_threshold and not self.memory_notified:
-                notification.notify(
+                self.toaster.show_toast(
                     title="System Monitor Alert",
-                    message=f"Memory usage exceeded threshold: {memory_usage:.1f}%",
-                    timeout=10
+                    msg=f"Memory usage exceeded threshold: {memory_usage:.1f}%",
+                    duration=10,
+                    threaded=True
                 )
                 self.memory_notified = True
                 logging.debug("Memory notification sent: %.1f%%", memory_usage)
@@ -137,10 +142,11 @@ class SystemMonitor:
                 self.memory_notified = False
                 
             if disk_usage > self.disk_threshold and not self.disk_notified:
-                notification.notify(
+                self.toaster.show_toast(
                     title="System Monitor Alert",
-                    message=f"Disk usage exceeded threshold: {disk_usage:.1f}%",
-                    timeout=10
+                    msg=f"Disk usage exceeded threshold: {disk_usage:.1f}%",
+                    duration=10,
+                    threaded=True
                 )
                 self.disk_notified = True
                 logging.debug("Disk notification sent: %.1f%%", disk_usage)
