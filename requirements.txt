@@ -1,2 +1,1 @@
 psutil
-win10toast
